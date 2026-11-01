@@ -13,23 +13,6 @@
   <em>Universidad Nacional Agraria La Molina · Facultad de Economía y Planificación · DAEI</em>
 </p>
 
----
-
-## Tabla de contenidos
-
-1. [Contexto y problema](#1-contexto-y-problema)
-2. [Objetivos](#2-objetivos)
-3. [Indicadores clave (KPI)](#3-indicadores-clave-kpi)
-4. [Hallazgos preliminares](#4-hallazgos-preliminares)
-5. [Preguntas de investigación](#5-preguntas-de-investigación)
-6. [Hoja de ruta](#6-hoja-de-ruta)
-7. [Dashboard](#7-dashboard)
-8. [Estructura del repositorio](#8-estructura-del-repositorio)
-9. [Fuentes de datos](#9-fuentes-de-datos)
-10. [Equipo](#10-equipo)
-
----
-
 ## 1. Contexto y problema
 
 **WoodCorp** opera varias plantas de producción y despacho (Essen, Aachen, Bonn, Crefeld, Duisburg y Wuppertal). La empresa enfrenta **altos costos por penalidades** asociadas a entregas que no cumplen los plazos establecidos.
