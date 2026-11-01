@@ -42,8 +42,12 @@ Reducir el costo de penalidades de WoodCorp identificando las causas de los incu
 | **Tasa de entregas a tiempo** | % de entregas realizadas dentro del plazo | **64 %** | 80 % | **−16 pp** |
 | **Costo total de penalidades** | Penalidades generadas por entregas tardías | **€ 11 824 768.50** | — | — |
 | **Volumen total despachado** | Kilogramos despachados | **47 740 004 kg** | — | — |
-| **Penalidad por kg despachado** | Costo de penalidades ÷ volumen | **≈ € 0.25 / kg** | — | — |
+| **Tarifa de penalidad** | Costo por cada kg entregado fuera de plazo | **€ 0.75 / kg tardío** | — | — |
+| **Volumen entregado tarde** | Penalidades ÷ tarifa de € 0.75 | **≈ 15.77 M kg (33 % del volumen)** | — | — |
+| **Penalidad promedio por kg despachado** | Penalidades ÷ volumen total (incluye lo entregado a tiempo) | **≈ € 0.25 / kg** | — | — |
 | **Concentración de penalidades** | % de penalidades en Essen + Aachen | **92.7 %** | — | — |
+
+> **Nota:** el 33 % de volumen tardío (medido en kg) no coincide con el 36 % que resulta del 64 % de entregas a tiempo (medido en número de entregas), porque las entregas tardías pueden tener un tamaño distinto al promedio.
 
 ## 4. Hallazgos preliminares
 
@@ -96,7 +100,7 @@ streamlit run dashboard_woodcorp.py
 
 Se abrirá en `http://localhost:8501`.
 
-> Los logos (`escudo unalm.jpg`, `escudo facultad.png`, `daeilogo.jpg`) deben estar en la misma carpeta que `app_woodcorp.py`.```
+> Los logos (`escudo unalm.jpg`, `escudo facultad.png`, `daeilogo.jpg`) deben estar en la misma carpeta que `dashboard_woodcorp.py`.
 
 ## 6. Fuentes de datos
 - Registro de procesos de la empresa WoodCorp, en los archivos `WoodCorp 02C Activity Table.csv` y `WoodCorp 02C Case Table.csv`
@@ -110,4 +114,5 @@ Se abrirá en `http://localhost:8501`.
 | Fabrizio, Rocha Hidalgo|
 | Adrian Fabrizio, Zuazo Farje |
 | Andree del Piero, De la Torre Cardenas |
-**Curso:** Ingenieria de procesos · **Docente:** Valencia Chacón, Raphael Félix · **Ciclo:** _2026-II
+
+**Curso:** Ingenieria de procesos · **Docente:** Valencia Chacón, Raphael Félix · **Ciclo:** 2026-II
