@@ -77,6 +77,9 @@ Reducir el costo de penalidades de WoodCorp identificando las causas de los incu
 2. ¿Cuál es la distribución de almacenes automatizados frente a no automatizados?
 3. ¿Qué recomiendas cambiar?
 
+El análisis y valores obtenidos fueron tomados de la plataforma Celonis, el trabajo puede verse en el siguiente enlace:
+https://academic-celonis-uedvyj.eu-2.celonis.cloud/package-manager/ui/studio/ui/spaces/f1fa6bba-cccf-433c-94c8-3310db6df8d4/packages/c7d594c9-2392-47e9-9ed4-f09d5c56be63/nodes/401a632d-c8ba-4e26-9b05-78f4ac5c8157?activeTabs=0bd3d208_b291_43cf_8b11_806dd09ff84b-view:1d479cf7-4000-4172-b7fa-3c882686d542&share=dbe5941b-351c-48c9-aa5d-27d4191598a8&bookmark=false
+
 La aplicación en Streamlit desplegará el dashboard del proyecto, esta tiene cuatro pestañas:
 
 1. **Presentación del caso y KPI:** indicadores generales y medidor frente a la meta.
