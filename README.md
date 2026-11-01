@@ -99,9 +99,7 @@ Se abrirá en `http://localhost:8501`.
 > Los logos (`escudo unalm.jpg`, `escudo facultad.png`, `daeilogo.jpg`) deben estar en la misma carpeta que `app_woodcorp.py`.```
 
 ## 6. Fuentes de datos
-
-- Dashboard de **Celonis** del caso WoodCorp (volúmenes, entregas a tiempo y penalidades por planta y tipo de almacén).
-- Los valores mensuales mostrados en el gráfico de penalidades son **aproximados** (leídos del gráfico) mientras no se cargue `penalidades_mensuales.csv`.
+- Registro de procesos de la empresa WoodCorp, en los archivos `WoodCorp 02C Activity Table.csv` y `WoodCorp 02C Case Table.csv`
 
 ## 7. Equipo
 
