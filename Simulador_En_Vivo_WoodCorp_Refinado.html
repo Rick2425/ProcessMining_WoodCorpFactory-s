@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gemelo Digital WoodCorp - Simulador en Vivo (Sin Modelo vs Con Modelo)</title>
+<style>
+  :root {
+    --bg-dark: #0f172a;
+    --panel-bg: #1e293b;
+    --border-color: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --red: #ef4444;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    padding: 16px;
+    overflow-x: hidden;
+  }
+  .header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+  .header h1 {
+    font-size: 1.35rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+  button {
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.88rem;
+  }
+  button:hover { filter: brightness(1.15); }
+  button.secondary { background: #475569; }
+  button.active-speed { background: var(--green); }
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    background: #0f172a;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+  .slider-group label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+  .slider-group input[type=range] {
+    width: 140px;
+    cursor: pointer;
+  }
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 1100px) {
+    .grid-container { grid-template-columns: 1fr; }
+  }
+  .sim-panel {
+    background: var(--panel-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid var(--red); }
+  .badge-green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid var(--green); }
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .kpi-box {
+    background: #0f172a;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+  }
+  .kpi-title { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+  .kpi-val { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
+  canvas {
+    width: 100%;
+    height: 410px;
+    background: #0b1120;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 14px;
+    background: var(--panel-bg);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    font-size: 0.8rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .savings-banner {
+    margin-top: 14px;
+    background: linear-gradient(90deg, rgba(16,185,129,0.15) 0%, rgba(59,130,246,0.15) 100%);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .savings-item { text-align: center; }
+  .savings-item span { display: block; font-size: 0.75rem; color: var(--text-muted); }
+  .savings-item strong { font-size: 1.25rem; color: #34d399; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>🏭 Gemelo Digital O2C: WoodCorp Factory</h1>
+    <p>Simulación en tiempo real basada en 19,953 pedidos, reglas de Celonis y ML (LightGBM + XGBoost)</p>
+  </div>
+  <div class="controls">
+    <button id="btnPlay" onclick="togglePlay()">⏸ Pausar</button>
+    <button class="secondary" onclick="resetSim()">🔄 Reiniciar</button>
+    <div style="display:flex; gap:4px;">
+      <button id="spd1" class="active-speed" onclick="setSpeed(1)">1x</button>
+      <button id="spd2" class="secondary" onclick="setSpeed(2.5)">2.5x</button>
+      <button id="spd5" class="secondary" onclick="setSpeed(5)">5x</button>
+    </div>
+    <div class="slider-group">
+      <label for="capSlider">Tope Semanal Essen: <strong id="capVal" style="color:#38bdf8;">300 t</strong> (Aachen: 50%)</label>
+      <input type="range" id="capSlider" min="150" max="600" step="25" value="300" oninput="updateCap(this.value)">
+    </div>
+  </div>
+</div>
+
+<div class="grid-container">
+  <!-- PANEL IZQUIERDO: SIN MODELO -->
+  <div class="sim-panel">
+    <div class="panel-header">
+      <div>
+        <strong style="font-size:1.05rem;">Escenario A: Operación Histórica (As-Is)</strong>
+        <div style="font-size:0.78rem; color:var(--text-muted);">Sin desvío por saturación • UPS 90% • FedEx CH / DB Schenker</div>
+      </div>
+      <span class="badge badge-red">Sin Modelo</span>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-box">
+        <div class="kpi-title">Procesados</div>
+        <div class="kpi-val" id="asis-count">0</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">A Tiempo</div>
+        <div class="kpi-val" id="asis-ontime" style="color:var(--amber);">64.4%</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">Ciclo Promedio</div>
+        <div class="kpi-val" id="asis-time" style="color:#f87171;">14.8 d</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">Penalidades</div>
+        <div class="kpi-val" id="asis-pen" style="color:var(--red);">€ 0</div>
+      </div>
+    </div>
+    <canvas id="canvasAsIs" width="620" height="410"></canvas>
+  </div>
+
+  <!-- PANEL DERECHO: CON MODELO -->
+  <div class="sim-panel">
+    <div class="panel-header">
+      <div>
+        <strong style="font-size:1.05rem;">Escenario B: Modelo Prescriptivo ML (To-Be)</strong>
+        <div style="font-size:0.78rem; color:var(--text-muted);">Desvío Spillover a Bonn/Crefeld • DHL/UPS Óptimo • Baja DB Schenker</div>
+      </div>
+      <span class="badge badge-green">Con Modelo</span>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-box">
+        <div class="kpi-title">Procesados</div>
+        <div class="kpi-val" id="tobe-count">0</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">A Tiempo</div>
+        <div class="kpi-val" id="tobe-ontime" style="color:var(--green);">83.5%</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">Ciclo Promedio</div>
+        <div class="kpi-val" id="tobe-time" style="color:#34d399;">9.2 d</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kpi-title">Penalidades</div>
+        <div class="kpi-val" id="tobe-pen" style="color:var(--green);">€ 0</div>
+      </div>
+    </div>
+    <canvas id="canvasToBe" width="620" height="410"></canvas>
+  </div>
+</div>
+
+<div class="savings-banner">
+  <div class="savings-item">
+    <span>Ahorro Acumulado en Simulación</span>
+    <strong id="diff-savings">€ 0</strong>
+  </div>
+  <div class="savings-item">
+    <span>Reducción de Tiempo de Ciclo</span>
+    <strong id="diff-time">-0.0 días (-0%)</strong>
+  </div>
+  <div class="savings-item">
+    <span>Pedidos Desviados por Saturación (Spillover)</span>
+    <strong id="diff-diverted" style="color:#38bdf8;">0 pedidos</strong>
+  </div>
+  <div class="savings-item">
+    <span>Proyección Anualizada (Base €11.82M)</span>
+    <strong id="diff-proj">€ 0 ahorrados</strong>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="dot" style="background:#38bdf8;"></span> Pedido Crates (10 kg/u)</div>
+  <div class="legend-item"><span class="dot" style="background:#f59e0b;"></span> Pedido Pallets (20 kg/u)</div>
+  <div class="legend-item"><span class="dot" style="background:#a855f7;"></span> Pedido Desviado (Spillover)</div>
+  <div class="legend-item"><span class="dot" style="background:#10b981;"></span> Entrega a Tiempo</div>
+  <div class="legend-item"><span class="dot" style="background:#ef4444;"></span> Entrega con Retraso (Penalidad)</div>
+</div>
+
+<script>
+// Parámetros calibrados con los datos reales de WoodCorp (19,953 pedidos, €11,824,768.50 penalidad total)
+let isRunning = true;
+let simSpeed = 1.0;
+let essenCapTons = 300;
+let frameCount = 0;
+
+const cAsIs = document.getElementById('canvasAsIs');
+const ctxA = cAsIs.getContext('2d');
+const cToBe = document.getElementById('canvasToBe');
+const ctxB = cToBe.getContext('2d');
+
+const NODES = {
+  entrada: { x: 55, y: 205, w: 64, h: 90, label: "Pedidos\nO2C", color: "#334155" },
+  factories: [
+    { id: "Essen",   x: 215, y: 65,  w: 95, h: 52, auto: false, baseRate: 0.456 },
+    { id: "Aachen",  x: 215, y: 145, w: 95, h: 52, auto: false, baseRate: 0.408 },
+    { id: "Bonn",    x: 215, y: 225, w: 95, h: 52, auto: true,  baseRate: 0.058 },
+    { id: "Crefeld", x: 215, y: 300, w: 95, h: 52, auto: false, baseRate: 0.071 },
+    { id: "Duis/Wup",x: 215, y: 368, w: 95, h: 34, auto: true,  baseRate: 0.007 }
+  ],
+  carriers: [
+    { id: "UPS",    x: 405, y: 80,  w: 85, h: 50 },
+    { id: "DHL",    x: 405, y: 175, w: 85, h: 50 },
+    { id: "FedEx",  x: 405, y: 265, w: 85, h: 45 },
+    { id: "DB Sch", x: 405, y: 345, w: 85, h: 40 }
+  ],
+  outcomes: [
+    { id: "A Tiempo", x: 555, y: 125, w: 80, h: 75, color: "#065f46", border: "#10b981" },
+    { id: "Retraso",  x: 555, y: 275, w: 80, h: 75, color: "#7f1d1d", border: "#ef4444" }
+  ]
+};
+
+function createSimState() {
+  return {
+    particles: [],
+    load: { "Essen": 0, "Aachen": 0, "Bonn": 0, "Crefeld": 0, "Duis/Wup": 0 },
+    stats: { total: 0, onTime: 0, late: 0, penalty: 0, totalDays: 0, diverted: 0 }
+  };
+}
+
+let stateA = createSimState();
+let stateB = createSimState();
+
+function updateCap(val) {
+  essenCapTons = parseInt(val);
+  document.getElementById('capVal').innerText = essenCapTons + ' t';
+}
+
+function togglePlay() {
+  isRunning = !isRunning;
+  document.getElementById('btnPlay').innerText = isRunning ? '⏸ Pausar' : '▶ Reanudar';
+}
+
+function setSpeed(s) {
+  simSpeed = s;
+  ['spd1', 'spd2', 'spd5'].forEach(id => document.getElementById(id).className = 'secondary');
+  if (s === 1) document.getElementById('spd1').className = 'active-speed';
+  if (s === 2.5) document.getElementById('spd2').className = 'active-speed';
+  if (s === 5) document.getElementById('spd5').className = 'active-speed';
+}
+
+function resetSim() {
+  stateA = createSimState();
+  stateB = createSimState();
+  frameCount = 0;
+}
+
+function spawnOrderPair() {
+  const isPallets = Math.random() < 0.48; 
+  const product = isPallets ? 'Pallets' : 'Crates';
+  const weightTons = isPallets ? (8 + Math.random() * 22) : (5 + Math.random() * 18);
+  const orderValue = 2500 + Math.random() * 14000;
+
+  // País destino
+  const rCountry = Math.random();
+  let country = 'DE';
+  if (rCountry > 0.62 && rCountry <= 0.72) country = 'CH';
+  else if (rCountry > 0.72 && rCountry <= 0.80) country = 'US';
+  else if (rCountry > 0.80) country = 'FR';
+
+  // Fábrica origen
+  const rFac = Math.random();
+  let origFactory = 'Essen';
+  if (rFac < 0.456) origFactory = 'Essen';
+  else if (rFac < 0.864) origFactory = 'Aachen';
+  else if (rFac < 0.922) origFactory = 'Bonn';
+  else if (rFac < 0.993) origFactory = 'Crefeld';
+  else origFactory = 'Duis/Wup';
+
+  // --- LÓGICA ESCENARIO A (SIN MODELO / AS-IS) ---
+  let carrierA = 'UPS';
+  if (country === 'CH' && Math.random() < 0.65) carrierA = 'FedEx';
+  else if (origFactory === 'Essen' && Math.random() < 0.03) carrierA = 'DB Sch';
+  else if (Math.random() < 0.065) carrierA = 'DHL';
+
+  let lateProbA = 0.34;
+  if (origFactory === 'Essen' || origFactory === 'Aachen') lateProbA += 0.05;
+  if (isPallets && origFactory === 'Aachen') lateProbA += 0.11;
+  if (carrierA === 'FedEx' && country === 'CH') lateProbA = 0.53;
+  if (carrierA === 'DB Sch') lateProbA = 0.94;
+  if (stateA.load[origFactory] > essenCapTons) lateProbA += 0.14;
+
+  const isLateA = Math.random() < lateProbA;
+  const daysA = isLateA ? (16 + Math.random() * 9) : (8 + Math.random() * 5);
+
+  stateA.particles.push({
+    x: NODES.entrada.x + 25, y: NODES.entrada.y + (Math.random() * 40 - 20),
+    stage: 0, progress: 0, product, weightTons, orderValue,
+    factory: origFactory, carrier: carrierA, isLate: isLateA, days: daysA, diverted: false
+  });
+
+  // --- LÓGICA ESCENARIO B (CON MODELO PRESCRIPTIVO / TO-BE) ---
+  let factoryB = origFactory;
+  let diverted = false;
+  const aachenCap = essenCapTons * 0.5;
+
+  if (factoryB === 'Essen' && stateB.load['Essen'] >= essenCapTons) {
+    factoryB = isPallets ? 'Crefeld' : 'Bonn';
+    diverted = true;
+  } else if (factoryB === 'Aachen' && stateB.load['Aachen'] >= aachenCap) {
+    factoryB = isPallets ? 'Crefeld' : 'Bonn';
+    diverted = true;
+  }
+
+  let carrierB = 'DHL';
+  if (country === 'CH') carrierB = 'UPS'; 
+  else if (country === 'DE' || country === 'US' || country === 'FR') carrierB = 'DHL';
+
+  let lateProbB = 0.16;
+  if (diverted) lateProbB = 0.18; 
+  if (carrierB === 'UPS' && country === 'CH') lateProbB = 0.24;
+
+  const isLateB = Math.random() < lateProbB;
+  const daysB = isLateB ? (12 + Math.random() * 5) : (6.5 + Math.random() * 3.5);
+
+  stateB.particles.push({
+    x: NODES.entrada.x + 25, y: NODES.entrada.y + (Math.random() * 40 - 20),
+    stage: 0, progress: 0, product, weightTons, orderValue,
+    factory: factoryB, carrier: carrierB, isLate: isLateB, days: daysB, diverted
+  });
+}
+
+function getTargetCoords(p) {
+  if (p.stage === 0) return { x: NODES.factories.find(n => n.id === p.factory).x, y: NODES.factories.find(n => n.id === p.factory).y };
+  else if (p.stage === 1) return { x: NODES.carriers.find(n => n.id === p.carrier).x, y: NODES.carriers.find(n => n.id === p.carrier).y };
+  else return { x: p.isLate ? NODES.outcomes[1].x : NODES.outcomes[0].x, y: p.isLate ? NODES.outcomes[1].y : NODES.outcomes[0].y };
+}
+
+function updateState(state, isOptimized) {
+  for (let k in state.load) state.load[k] = Math.max(0, state.load[k] - 0.55 * simSpeed);
+
+  for (let i = state.particles.length - 1; i >= 0; i--) {
+    let p = state.particles[i];
+    let target = getTargetCoords(p);
+    let dx = target.x - p.x;
+    let dy = target.y - p.y;
+    let dist = Math.hypot(dx, dy);
+
+    let speedFactor = (!isOptimized && p.stage === 0 && state.load[p.factory] > essenCapTons) ? 0.55 : 1.0;
+    let step = 3.2 * simSpeed * speedFactor;
+
+    if (dist <= step) {
+      p.x = target.x;
+      p.y = target.y;
+
+      if (p.stage === 0) {
+        state.load[p.factory] += p.weightTons;
+        p.stage = 1;
+      } else if (p.stage === 1) {
+        p.stage = 2;
+      } else {
+        state.stats.total++;
+        state.stats.totalDays += p.days;
+        if (p.diverted) state.stats.diverted++;
+        if (p.isLate) {
+          state.stats.late++;
+          // € 592 factor promedio de penalidad por pedido tardio basado en Celonis 11.8M / 19953 orders
+          state.stats.penalty += (p.orderValue * 0.16); 
+        } else {
+          state.stats.onTime++;
+        }
+        state.particles.splice(i, 1);
+      }
+    } else {
+      p.x += (dx / dist) * step;
+      p.y += (dy / dist) * step;
+    }
+  }
+}
+
+function drawLines(ctx, isOptimized) {
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = "rgba(148, 163, 184, 0.16)";
+
+  NODES.factories.forEach(f => {
+    ctx.beginPath();
+    ctx.moveTo(NODES.entrada.x + 30, NODES.entrada.y);
+    ctx.lineTo(f.x - 45, f.y);
+    ctx.stroke();
+  });
+
+  NODES.factories.forEach(f => {
+    NODES.carriers.forEach(c => {
+      if (isOptimized && c.id === "DB Sch") return; 
+      ctx.beginPath();
+      ctx.moveTo(f.x + 45, f.y);
+      ctx.lineTo(c.x - 42, c.y);
+      ctx.stroke();
+    });
+  });
+
+  NODES.carriers.forEach(c => {
+    if (isOptimized && c.id === "DB Sch") return;
+    NODES.outcomes.forEach(o => {
+      ctx.beginPath();
+      ctx.moveTo(c.x + 42, c.y);
+      ctx.lineTo(o.x - 40, o.y);
+      ctx.stroke();
+    });
+  });
+}
+
+function drawScene(ctx, state, isOptimized) {
+  ctx.clearRect(0, 0, 620, 410);
+  drawLines(ctx, isOptimized);
+
+  const ent = NODES.entrada;
+  ctx.fillStyle = ent.color;
+  ctx.strokeStyle = "#64748b";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(ent.x - ent.w/2, ent.y - ent.h/2, ent.w, ent.h, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 11px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Pedidos", ent.x, ent.y - 4);
+  ctx.fillText("O2C", ent.x, ent.y + 10);
+
+  NODES.factories.forEach(f => {
+    let maxCap = f.id === "Essen" ? essenCapTons : (f.id === "Aachen" ? essenCapTons * 0.5 : 220);
+    let currentLoad = state.load[f.id] || 0;
+    let ratio = Math.min(1.25, currentLoad / maxCap);
+    let isSaturated = ratio >= 0.98;
+
+    ctx.fillStyle = isSaturated ? "rgba(127, 29, 29, 0.85)" : "#1e293b";
+    ctx.strokeStyle = isSaturated ? "#ef4444" : (f.auto ? "#10b981" : "#475569");
+    ctx.lineWidth = isSaturated ? 2 : 1.5;
+
+    ctx.beginPath();
+    ctx.roundRect(f.x - f.w/2, f.y - f.h/2, f.w, f.h, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText(f.id + (f.auto ? " ⚡" : ""), f.x, f.y - 6);
+
+    let barW = f.w - 14;
+    let barH = 6;
+    let barX = f.x - barW/2;
+    let barY = f.y + 6;
+    ctx.fillStyle = "#0f172a";
+    ctx.fillRect(barX, barY, barW, barH);
+
+    ctx.fillStyle = ratio > 0.95 ? "#ef4444" : (ratio > 0.7 ? "#f59e0b" : "#10b981");
+    ctx.fillRect(barX, barY, Math.min(barW, barW * ratio), barH);
+
+    if (f.h > 40) {
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "9px sans-serif";
+      ctx.fillText(`${Math.round(currentLoad)}t / ${Math.round(maxCap)}t`, f.x, f.y + 21);
+    }
+  });
+
+  NODES.carriers.forEach(c => {
+    let disabled = isOptimized && c.id === "DB Sch";
+    ctx.fillStyle = disabled ? "rgba(15, 23, 42, 0.5)" : "#1e293b";
+    ctx.strokeStyle = disabled ? "#334155" : "#3b82f6";
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    ctx.roundRect(c.x - c.w/2, c.y - c.h/2, c.w, c.h, 7);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = disabled ? "#475569" : "#f8fafc";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText(c.id, c.x, c.y + 4);
+    if (disabled) {
+      ctx.fillStyle = "#ef4444";
+      ctx.font = "9px sans-serif";
+      ctx.fillText("ELIMINADO", c.x, c.y + 15);
+    }
+  });
+
+  NODES.outcomes.forEach(o => {
+    ctx.fillStyle = o.color;
+    ctx.strokeStyle = o.border;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(o.x - o.w/2, o.y - o.h/2, o.w, o.h, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText(o.id, o.x, o.y - 4);
+
+    let count = o.id === "A Tiempo" ? state.stats.onTime : state.stats.late;
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText(count, o.x, o.y + 13);
+  });
+
+  state.particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4.3, 0, Math.PI * 2);
+    if (p.stage === 2) {
+      ctx.fillStyle = p.isLate ? "#ef4444" : "#10b981";
+    } else if (p.diverted) {
+      ctx.fillStyle = "#a855f7";
+    } else {
+      ctx.fillStyle = p.product === "Pallets" ? "#f59e0b" : "#38bdf8";
+    }
+    ctx.fill();
+  });
+}
+
+function updateDashboardMetrics() {
+  document.getElementById('asis-count').innerText = stateA.stats.total;
+  let rateA = stateA.stats.total > 0 ? (stateA.stats.onTime / stateA.stats.total * 100) : 64.4;
+  document.getElementById('asis-ontime').innerText = rateA.toFixed(1) + '%';
+  let avgDaysA = stateA.stats.total > 0 ? (stateA.stats.totalDays / stateA.stats.total) : 14.8;
+  document.getElementById('asis-time').innerText = avgDaysA.toFixed(1) + ' d';
+  document.getElementById('asis-pen').innerText = '€ ' + Math.round(stateA.stats.penalty).toLocaleString('es-ES');
+
+  document.getElementById('tobe-count').innerText = stateB.stats.total;
+  let rateB = stateB.stats.total > 0 ? (stateB.stats.onTime / stateB.stats.total * 100) : 83.5;
+  document.getElementById('tobe-ontime').innerText = rateB.toFixed(1) + '%';
+  let avgDaysB = stateB.stats.total > 0 ? (stateB.stats.totalDays / stateB.stats.total) : 9.2;
+  document.getElementById('tobe-time').innerText = avgDaysB.toFixed(1) + ' d';
+  document.getElementById('tobe-pen').innerText = '€ ' + Math.round(stateB.stats.penalty).toLocaleString('es-ES');
+
+  let saved = Math.max(0, stateA.stats.penalty - stateB.stats.penalty);
+  document.getElementById('diff-savings').innerText = '€ ' + Math.round(saved).toLocaleString('es-ES');
+
+  let timeDiff = avgDaysA - avgDaysB;
+  let timePct = avgDaysA > 0 ? (timeDiff / avgDaysA * 100) : 0;
+  document.getElementById('diff-time').innerText = `-${timeDiff.toFixed(1)} días (-${timePct.toFixed(0)}%)`;
+  document.getElementById('diff-diverted').innerText = stateB.stats.diverted + ' pedidos';
+
+  if (stateA.stats.penalty > 0) {
+    let ratioSaved = saved / stateA.stats.penalty;
+    let annualProj = 11824768.50 * ratioSaved;
+    document.getElementById('diff-proj').innerText = '€ ' + Math.round(annualProj).toLocaleString('es-ES') + ' ahorrados';
+  }
+}
+
+function loop() {
+  if (isRunning) {
+    frameCount += simSpeed;
+    if (frameCount >= 14) {
+      spawnOrderPair();
+      frameCount = 0;
+    }
+    updateState(stateA, false);
+    updateState(stateB, true);
+    updateDashboardMetrics();
+  }
+  drawScene(ctxA, stateA, false);
+  drawScene(ctxB, stateB, true);
+  requestAnimationFrame(loop);
+}
+
+loop();
+</script>
+</body>
+</html>
